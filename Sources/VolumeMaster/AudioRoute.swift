@@ -46,7 +46,8 @@ final class AudioRoute {
             guard ownProcess != 0 else { throw AudioFailure(message: "The app’s audio process isn’t available. Reopen Volume Master.") }
 
             // Device-specific capture avoids global mixdown attenuation on multichannel systems.
-            let description = CATapDescription(excludingProcesses: [ownProcess], deviceUID: uid, stream: 0)
+            let description = CATapDescription(processes: [ownProcess], deviceUID: uid, stream: 0)
+            description.isExclusive = true
             description.name = "Volume Master"
             description.isPrivate = true
             description.muteBehavior = .mutedWhenTapped

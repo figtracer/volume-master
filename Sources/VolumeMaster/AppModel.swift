@@ -30,18 +30,18 @@ final class AppModel: ObservableObject {
             if settings.bands.count == 5 { bands = settings.bands.map { Self.clamp($0, -9...9, fallback: 0) } }
         }
         timer = Timer.scheduledTimer(withTimeInterval: 1.0 / 20, repeats: true) { [weak self] _ in
-            Task { @MainActor in self?.refresh() }
+            MainActor.assumeIsolated { self?.refresh() }
         }
         let center = NSWorkspace.shared.notificationCenter
         observations.append(center.addObserver(forName: NSWorkspace.willSleepNotification, object: nil, queue: .main) { [weak self] _ in
-            Task { @MainActor in
+            MainActor.assumeIsolated {
                 self?.sleeping = true
                 self?.route.stop()
                 self?.status = "Paused while your Mac sleeps"
             }
         })
         observations.append(center.addObserver(forName: NSWorkspace.didWakeNotification, object: nil, queue: .main) { [weak self] _ in
-            Task { @MainActor in
+            MainActor.assumeIsolated {
                 self?.sleeping = false
                 if self?.enabled == true { self?.start() }
             }
